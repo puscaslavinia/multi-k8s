@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letenrypt.org/directory
+    email: 'lavinia.puscas@acesa.eu'
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - http01: #we want to use this porcess to obtain a certifiate
+          ingress:
+            class: nginx

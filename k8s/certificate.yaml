@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+metadata:
+  name: yourdomain-com-tls
+spec:
+  secretName: yourdomain-com #specify where seret is stored
+  issuerRef: 
+    name: lets-encrypt-prod
+    kind: ClusterIssuer
+  commonName: yourdomain.com #is what is put in certificate details
+  dnsNames:
+    - yourdomain.com  #the domain name
+    - www.yourdomain.com #the www version
