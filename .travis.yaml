@@ -1,0 +1,28 @@
+sudo: required
+services:  
+  - docker
+env:
+  global:
+    - SHA=$(git rev-parse HEAD) #assign to a variable the latest commit sha to use it as a tag for version
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1 #disable google cloud to show prompts like "do you want to continue?press y"
+before_install:  
+  - openssl aes-256-cbc -K $eencrypted_0c35eebf403c_key -iv $ncrypted_0c35eebf403c_iv -in service-account.json.enc -out service-account.json -d #decryptes the enrypted file
+  - url https://sdk.cloud.google.com| bash > /dev/null; #will download google sdk and install locaclly  on our instance 
+  - source $HOME/google-cloud-sdk/path.bash.inc #will look at the default install directory of google cloud sdk and path file will modify shell config inside our CI
+  - gcloud components update kubectl #install kubectl
+  - gcloud auth tivate-service-account --key-file service-account.json #equivalent to AM system from AWS -> to give rights to do stuff. the st of credeentials wiill be in the file service-account.json
+  - gcloud config set project skilful-berm-214822 #add the projet name from the gcp zone you have assigned (is actually the projet id)
+  - gcloud config set compute/zone us-central1-a
+  - gcloud container lusters get-credentials multi-cluster
+  - echo "$DOKER_PASSWORD" | doker login -u "$DOKER_USERNAME" --password-stdin #login to docker hub using variables defined in travis
+  - doccker build -t laviniapusas/reat-test -f ./client/Dockerfile.dev ./client # run test that are defined only for Docker.dev file in the context ./client
+
+script:
+  - docker run laviniapusas/react-test npm test -- --coverage
+
+deploy:
+  provider: script #telling travis that the sccript is taking care of the deployment
+  script: bash ./deploy.sh
+  on:
+    branch: master
+
